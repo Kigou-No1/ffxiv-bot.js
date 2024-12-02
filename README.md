@@ -1,7 +1,6 @@
 # ffxiv-bot.js
 FF14の便利機能を提供するDiscordBotです
-
-To develop
+事前にwrangler.tomlに必要な環境変数を設定してください。
 ```
 bun install
 bun run dev
@@ -9,5 +8,6 @@ bun run dev
 To deploy
 ```
 bun install
+wrangler secret put DISCORD_TOKEN
 bun run deploy
 ```

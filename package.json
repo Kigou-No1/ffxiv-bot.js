@@ -5,6 +5,8 @@
     "deploy": "wrangler deploy --minify"
   },
   "dependencies": {
+    "discord-api-types": "^0.37.110",
+    "discord-interactions": "^4.1.0",
     "hono": "^4.6.12"
   },
   "devDependencies": {

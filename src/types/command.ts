@@ -1,7 +1,13 @@
-import { APIApplicationCommandOption, ApplicationCommandType } from "discord-api-types/v10";
+import {
+    APIApplicationCommandAutocompleteResponse,
+    APIApplicationCommandOption,
+    APIInteractionResponseDeferredChannelMessageWithSource,
+    APIInteractionResponseDeferredMessageUpdate,
+    ApplicationCommandType,
+    RESTPatchAPIInteractionOriginalResponseFormDataBody,
+} from "discord-api-types/v10";
 import { Context } from "hono";
 import { Interaction } from "./interaction";
-import { APIApplicationCommand } from "discord-api-types/v10";
 import { APIResponse } from "../utils";
 
 export type Command = {
@@ -12,6 +18,11 @@ export type Command = {
         options?: APIApplicationCommandOption[];
     };
     handler: (ctx: Context, interaction: Interaction) => Promise<APIResponse>;
+    autocomplete_handler?: (
+        ctx: Context,
+        interaction: Interaction,
+    ) => Promise<APIApplicationCommandAutocompleteResponse>;
+    deferHandler?: (ctx: Context, interaction: Interaction) => Promise<void>;
     guildOnly?: boolean;
     guildId?: string;
 };

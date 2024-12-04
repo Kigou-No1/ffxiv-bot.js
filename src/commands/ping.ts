@@ -8,14 +8,14 @@ import { ApplicationCommandType } from "discord-api-types/v10";
 const handler = async (context: Context, interaction: Interaction) => {
     return response(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, {
         content: "Pong!",
-    })
-}
+    });
+};
 
 export const ping: Command = {
     commandData: {
         name: "ping",
         description: "Ping the bot",
-        type: ApplicationCommandType.ChatInput
+        type: ApplicationCommandType.ChatInput,
     },
     handler: handler,
-}
+};

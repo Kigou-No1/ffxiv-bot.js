@@ -1,4 +1,6 @@
 import {
+    APIApplicationCommandAutocompleteResponse,
+    APICommandAutocompleteInteractionResponseCallbackData,
     APIEmbed,
     APIEmbedAuthor,
     APIEmbedField,
@@ -7,36 +9,30 @@ import {
     APIEmbedThumbnail,
     APIEmbedVideo,
     APIInteractionResponseCallbackData,
+    APIModalInteractionResponseCallbackData,
+    RESTDeleteAPIInteractionFollowupResult,
+    RESTDeleteAPIInteractionOriginalResponseResult,
+    RESTGetAPIInteractionOriginalResponseResult,
+    RESTPatchAPIInteractionFollowupJSONBody,
+    RESTPatchAPIInteractionFollowupResult,
+    RESTPatchAPIInteractionOriginalResponseJSONBody,
+    RESTPatchAPIInteractionOriginalResponseResult,
+    RESTPostAPIInteractionFollowupJSONBody,
 } from "discord-api-types/v10";
 import { InteractionResponseType } from "discord-interactions";
 
 export type APIResponse = {
-    type: InteractionResponseType;
-    data: APIInteractionResponseCallbackData;
+    response: {
+        type: InteractionResponseType;
+        data:
+            | APIInteractionResponseCallbackData
+            | APICommandAutocompleteInteractionResponseCallbackData
+            | APIModalInteractionResponseCallbackData;
+    };
+    deffered?: boolean;
 };
 
-export const response = (
-    type: InteractionResponseType,
-    data: APIInteractionResponseCallbackData,
-) => {
-    return {
-        type: type,
-        data: data,
-    } as APIResponse;
-};
-
-export const commandNotFoundResponse = () => {
-    const embed = new EmbedBuilder()
-        .setTitle("Command not found")
-        .setDescription("The command you are looking for does not exist.")
-        .build();
-
-    return response(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, {
-        embeds: [embed],
-    });
-};
-
-class EmbedBuilder {
+export class EmbedBuilder {
     private embed: APIEmbed = {};
 
     constructor(optitons?: {
@@ -135,3 +131,112 @@ class EmbedBuilder {
         return this.embed;
     }
 }
+
+export class DefferedInteractionResponse {
+    private baseURL = "https://discord.com/api/v10/webhook";
+    private applicationId: string;
+    private token: string;
+    private url: string;
+    private header;
+    constructor(applicatoinId: string, token: string) {
+        this.applicationId = applicatoinId;
+        this.token = token;
+        this.url = `${this.baseURL}/${this.applicationId}/${this.token}/messages/@original`;
+        this.header = {
+            Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
+            "Content-Type": "application/json; charset=utf-8",
+            "User-Agent": "DiscordBot (https://github.com/Kigou-No1/ffxiv-bot.js, 0.0.1)",
+        };
+    }
+
+    public async getOriginal() {
+        const req = await fetch(this.url, {
+            method: "GET",
+            headers: this.header,
+        });
+        const res = await req.json();
+        return res as RESTGetAPIInteractionOriginalResponseResult;
+    }
+
+    public async editOriginal(data: RESTPatchAPIInteractionOriginalResponseJSONBody) {
+        const req = await fetch(this.url, {
+            method: "PATCH",
+            headers: this.header,
+            body: JSON.stringify(data),
+        });
+        const res = await req.json();
+        return res as RESTPatchAPIInteractionOriginalResponseResult;
+    }
+
+    public async deleteOriginal() {
+        const req = await fetch(this.url, {
+            method: "DELETE",
+            headers: this.header,
+        });
+        const res = await req.json();
+        return res as RESTDeleteAPIInteractionOriginalResponseResult;
+    }
+
+    public async createFollowup(data: RESTPostAPIInteractionFollowupJSONBody) {
+        const req = await fetch(this.url, {
+            method: "POST",
+            headers: this.header,
+            body: JSON.stringify(data),
+        });
+        const res = await req.json();
+        return res as RESTPostAPIInteractionFollowupJSONBody;
+    }
+
+    public async editFollowup(messageId: string, data: RESTPatchAPIInteractionFollowupJSONBody) {
+        const req = await fetch(`${this.url}/${messageId}`, {
+            method: "PATCH",
+            headers: this.header,
+            body: JSON.stringify(data),
+        });
+        const res = await req.json();
+        return res as RESTPatchAPIInteractionFollowupResult;
+    }
+
+    public async deleteFollowup(messageId: string) {
+        const req = await fetch(`${this.url}/${messageId}`, {
+            method: "DELETE",
+            headers: this.header,
+        });
+        const res = await req.json();
+        return res as RESTDeleteAPIInteractionFollowupResult;
+    }
+}
+
+export const response = (
+    type: InteractionResponseType,
+    data: APIInteractionResponseCallbackData,
+    deffered?: boolean,
+) => {
+    return {
+        response: {
+            type,
+            data,
+        },
+        deffered,
+    } as APIResponse;
+};
+
+export const autocompleteResponse = (
+    data: APICommandAutocompleteInteractionResponseCallbackData,
+) => {
+    return {
+        type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
+        data: data,
+    } as unknown as APIApplicationCommandAutocompleteResponse;
+};
+
+export const commandNotFoundResponse = () => {
+    const embed = new EmbedBuilder()
+        .setTitle("Command not found")
+        .setDescription("The command you are looking for does not exist.")
+        .build();
+
+    return response(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, {
+        embeds: [embed],
+    });
+};

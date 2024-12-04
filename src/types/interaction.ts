@@ -1,5 +1,15 @@
 import { InteractionType } from "discord-interactions";
-import { APIUser, APIMessage, APIChannel, APIGuild, APIGuildMember, Locale, Snowflake, InteractionContextType, APIApplicationCommandInteractionData} from "discord-api-types/v10";
+import {
+    APIUser,
+    APIMessage,
+    APIChannel,
+    APIGuild,
+    APIGuildMember,
+    Locale,
+    Snowflake,
+    InteractionContextType,
+    APIApplicationCommandInteractionData,
+} from "discord-api-types/v10";
 
 export type Interaction = {
     id: Snowflake;
@@ -18,4 +28,4 @@ export type Interaction = {
     locale?: Locale;
     guild_locale?: Locale;
     context: InteractionContextType;
-}
+};

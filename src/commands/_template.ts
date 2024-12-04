@@ -6,8 +6,9 @@ import { response } from "../utils";
 import { ApplicationCommandType } from "discord-api-types/v10";
 
 const handler = async (context: Context, interaction: Interaction) => {
+    // TODO: Implement the command handler
     return response(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, {
-        content: "Pong!",
+        content: "Test command",
     })
 }
 

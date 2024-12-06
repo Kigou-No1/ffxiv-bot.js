@@ -26,9 +26,8 @@ app.post("/", async c => {
             const response = c.json(result.response);
             if (result.deffered && command.deferHandler) {
                 await command.deferHandler(c, interaction);
-                return response;
             }
-            break;
+            return response;
         case InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE:
             if (command.autocomplete_handler) {
                 const autocomplete = await command.autocomplete_handler(c, interaction);

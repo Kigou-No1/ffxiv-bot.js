@@ -75,4 +75,5 @@ export const commandName: Command = {
     handler: handler,
     autocomplete_handler: autocompleteHandler,
     deferHandler: deferHandler,
+    guildOnly: false,
 };

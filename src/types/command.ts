@@ -1,10 +1,7 @@
 import {
     APIApplicationCommandAutocompleteResponse,
     APIApplicationCommandOption,
-    APIInteractionResponseDeferredChannelMessageWithSource,
-    APIInteractionResponseDeferredMessageUpdate,
     ApplicationCommandType,
-    RESTPatchAPIInteractionOriginalResponseFormDataBody,
 } from "discord-api-types/v10";
 import { Context } from "hono";
 import { Interaction } from "./interaction";
@@ -23,15 +20,15 @@ export type Command = {
         interaction: Interaction,
     ) => Promise<APIApplicationCommandAutocompleteResponse>;
     deferHandler?: (ctx: Context, interaction: Interaction) => Promise<void>;
-    guildOnly?: boolean;
+    guildOnly: boolean;
     guildId?: string;
 };
 
 export class CommandManager {
-    private commands: Command[] = [];
+    private commands: Command[];
 
-    constructor(commands?: Command[]) {
-        this.commands = [];
+    constructor(commands: Command[]) {
+        this.commands = commands;
     }
 
     public register(command: Command) {

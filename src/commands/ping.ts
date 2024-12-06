@@ -18,4 +18,5 @@ export const ping: Command = {
         type: ApplicationCommandType.ChatInput,
     },
     handler: handler,
+    guildOnly: false,
 };

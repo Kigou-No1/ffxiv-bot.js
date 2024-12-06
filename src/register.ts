@@ -1,5 +1,8 @@
-import { commandManager } from "./commands";
 import { Command } from "./types/command";
+import { configDotenv } from "dotenv";
+import { commandManager } from "./commands";
+
+configDotenv();
 
 const baseURL = "https://discord.com/api/v10/applications/" + process.env.DISCORD_CLIENT_ID;
 const globalURL = baseURL + "/commands";
@@ -7,6 +10,8 @@ const getGuildURL = (guildID: string) => baseURL + "/guilds/" + guildID + "/comm
 
 const registerGlobalCommands = async (commands: Command[]) => {
     const globalCommands = commands.filter(c => !c.guildOnly).map(c => c.commandData);
+
+    console.log("Loaded commands: ", globalCommands.length);
 
     const header = {
         Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
@@ -21,9 +26,9 @@ const registerGlobalCommands = async (commands: Command[]) => {
     });
 
     if (!globalResponse.ok) {
-        console.error("Failed to register global commands", globalResponse.statusText);
+        console.error("Failed to register global commands: ", globalResponse.statusText);
     } else {
-        console.log(`Successfully registered global ${globalCommands.length}commands`);
+        console.log(`Successfully registered global ${globalCommands.length} commands`);
     }
 };
 
@@ -31,6 +36,8 @@ const registerGuildCommands = async (commands: Command[], guildID: string) => {
     const guildCommands = commands
         .filter(c => c.guildOnly && c.guildId === guildID)
         .map(c => c.commandData);
+
+    console.log("Loaded commands: ", guildCommands.length);
 
     const header = {
         Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
@@ -45,9 +52,9 @@ const registerGuildCommands = async (commands: Command[], guildID: string) => {
     });
 
     if (!guildResponse.ok) {
-        console.error("Failed to register global commands", guildResponse.statusText);
+        console.error("Failed to register global commands: ", guildResponse.statusText);
     } else {
-        console.log(`Successfully registered guild ${guildCommands.length}commands`);
+        console.log(`Successfully registered guild ${guildCommands.length} commands`);
     }
 };
 

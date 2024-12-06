@@ -2,11 +2,14 @@
   "name": "ffxiv-bot.js",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify"
+    "deploy": "wrangler deploy --minify",
+    "register": "bunx dotenvx run -f .dev.vars -- bun run src/register.ts"
   },
   "dependencies": {
+    "@dotenvx/dotenvx": "^1.28.0",
     "discord-api-types": "^0.37.110",
     "discord-interactions": "^4.1.0",
+    "dotenv": "^16.4.7",
     "hono": "^4.6.12"
   },
   "devDependencies": {

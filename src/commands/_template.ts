@@ -1,13 +1,16 @@
-import { Context } from "hono";
+import { Context as HonoContext } from "hono";
 import { Interaction } from "../types/interaction";
 import { InteractionResponseType } from "discord-interactions";
 import { Command } from "../types/command";
-import { autocompleteResponse, DefferedInteractionResponse, response } from "../utils";
+import { autocompleteResponse, DefferedInteractionResponse, response } from "../utils/response";
 import {
     APIApplicationCommandAutocompleteInteraction,
     APIApplicationCommandInteractionDataStringOption,
     ApplicationCommandType,
 } from "discord-api-types/v10";
+import { Env } from "../types/types";
+
+type Context = HonoContext<Env>;
 
 const handler = async (context: Context, interaction: Interaction) => {
     // TODO: Implement the command handler
@@ -52,19 +55,12 @@ const deferHandler = async (context: Context, interaction: Interaction) => {
     // また、handlerでresponse(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, ...)でレスポンスを返す必要があります。
 
     const veryverylongprocess = async () => {
-        new Promise<void>(r => setTimeout(() => r(), 10000000))
-    } // よくわかんないけど長そうな処理
-    await veryverylongprocess()
+        new Promise<void>(r => setTimeout(() => r(), 10000000));
+    }; // よくわかんないけど長そうな処理
+    await veryverylongprocess();
 
-    const defferedResponse = new DefferedInteractionResponse(context.env.DISCORD_CLIENT_ID, interaction.token)
-    const res = await defferedResponse.createFollowup({
-        content: "Deffered response!",
-    });
-    // Or
-    // defferedResponse.editOriginal({
-    //     content: "Deffered response!",
-    // })
-}
+    await context.var.deferResponse().createFollowup({ content: "Defer!" });
+};
 
 export const commandName: Command = {
     commandData: {

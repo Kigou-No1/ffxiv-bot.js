@@ -1,13 +1,14 @@
 import { Hono } from "hono";
-import { InteractionResponseType, InteractionType } from "discord-interactions";
+import { InteractionType } from "discord-interactions";
 import { Interaction } from "./types/interaction";
-import { verifyRequest, responsePing, logger } from "./middleware";
-import { commandNotFoundResponse } from "./utils";
+import { verifyRequest, responsePing, logger, deferResponse } from "./middleware";
+import { commandNotFoundResponse } from "./utils/response";
 import { commandManager } from "./commands";
+import { Env } from "./types/types";
 
-const app = new Hono();
+const app = new Hono<Env>();
 const commands = commandManager;
-app.use(logger(), verifyRequest(), responsePing());
+app.use(logger(), verifyRequest(), responsePing(), deferResponse());
 
 app.post("/", async c => {
     const interaction = await c.req.json<Interaction>();
@@ -25,7 +26,7 @@ app.post("/", async c => {
             const result = await command.handler(c, interaction);
             const response = c.json(result.response);
             if (result.deffered && command.deferHandler) {
-                await command.deferHandler(c, interaction);
+                c.executionCtx.waitUntil(command.deferHandler(c, interaction));
             }
             return response;
         case InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE:

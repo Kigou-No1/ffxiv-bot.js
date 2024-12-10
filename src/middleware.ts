@@ -1,6 +1,7 @@
 import { verifyKey } from "discord-interactions";
 import { MiddlewareHandler } from "hono";
 import { Interaction } from "./types/interaction";
+import { DefferedInteractionResponse } from "./utils/response";
 
 export const verifyRequest = (): MiddlewareHandler => async (c, next) => {
     const signature = c.req.header("X-Signature-Ed25519");
@@ -25,3 +26,9 @@ export const logger = (): MiddlewareHandler => async (c, next) => {
     console.log(c.req.url);
     return await next();
 };
+
+export const deferResponse = (): MiddlewareHandler => async (c, next) => {
+    const token = (await c.req.raw.clone().json<Interaction>()).token;
+    c.set("deferResponse", () => new DefferedInteractionResponse(c.env.DISCORD_CLIENT_ID, token, c));
+    return await next();
+}

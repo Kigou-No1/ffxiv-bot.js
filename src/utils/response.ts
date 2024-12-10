@@ -1,3 +1,8 @@
+/**
+ * @file response.ts
+ * @description This file contains the response functions for the Discord API.
+ */
+
 import {
     APIApplicationCommandAutocompleteResponse,
     APICommandAutocompleteInteractionResponseCallbackData,
@@ -20,6 +25,8 @@ import {
     RESTPostAPIInteractionFollowupJSONBody,
 } from "discord-api-types/v10";
 import { InteractionResponseType } from "discord-interactions";
+import { Context } from "hono";
+import { Env } from "../types/types";
 
 export type APIResponse = {
     response: {
@@ -31,6 +38,17 @@ export type APIResponse = {
     };
     deffered?: boolean;
 };
+
+/**
+ * @class EmbedBuilder
+ * @description Embedを生成するためのクラスです。
+ * @example
+ * const embed = new EmbedBuilder()
+ *    .setTitle("Title")
+ *   .setDescription("Description")
+ *   .build();
+ * @returns {APIEmbed}
+ */
 
 export class EmbedBuilder {
     private embed: APIEmbed = {};
@@ -132,25 +150,38 @@ export class EmbedBuilder {
     }
 }
 
+/**
+ * @class DefferedInteractionResponse
+ * @description DefferedInteractionResponseを生成するためのクラスです。
+ * @example
+ * const defferedResponse = new DefferedInteractionResponse(context.env.DISCORD_CLIENT_ID, interaction.token)
+ * const res = await defferedResponse.createFollowup({
+ *    content: "Deffered response!",
+ * });
+ * @returns {DefferedInteractionResponse}
+ */
+
 export class DefferedInteractionResponse {
-    private baseURL = "https://discord.com/api/v10/webhook";
+    private baseURL = "https://discord.com/api/v10/webhooks";
     private applicationId: string;
     private token: string;
     private url: string;
+    private originalUrl: string;
     private header;
-    constructor(applicatoinId: string, token: string) {
+    constructor(applicatoinId: string, token: string, context: Context<Env>) {
         this.applicationId = applicatoinId;
         this.token = token;
-        this.url = `${this.baseURL}/${this.applicationId}/${this.token}/messages/@original`;
+        this.url = `${this.baseURL}/${this.applicationId}/${this.token}`;
+        this.originalUrl = `${this.url}/messages/@original`;
         this.header = {
-            Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
+            Authorization: `Bot ${context.env.DISCORD_TOKEN}`,
             "Content-Type": "application/json; charset=utf-8",
             "User-Agent": "DiscordBot (https://github.com/Kigou-No1/ffxiv-bot.js, 0.0.1)",
         };
     }
 
     public async getOriginal() {
-        const req = await fetch(this.url, {
+        const req = await fetch(this.originalUrl, {
             method: "GET",
             headers: this.header,
         });
@@ -159,7 +190,7 @@ export class DefferedInteractionResponse {
     }
 
     public async editOriginal(data: RESTPatchAPIInteractionOriginalResponseJSONBody) {
-        const req = await fetch(this.url, {
+        const req = await fetch(this.originalUrl, {
             method: "PATCH",
             headers: this.header,
             body: JSON.stringify(data),
@@ -169,7 +200,7 @@ export class DefferedInteractionResponse {
     }
 
     public async deleteOriginal() {
-        const req = await fetch(this.url, {
+        const req = await fetch(this.originalUrl, {
             method: "DELETE",
             headers: this.header,
         });
@@ -184,6 +215,7 @@ export class DefferedInteractionResponse {
             body: JSON.stringify(data),
         });
         const res = await req.json();
+        console.log(req.status);
         return res as RESTPostAPIInteractionFollowupJSONBody;
     }
 
@@ -207,6 +239,14 @@ export class DefferedInteractionResponse {
     }
 }
 
+/**
+ * 
+ * @param type レスポンスの種類を表します。
+ * @param data メッセージの内容を表します。
+ * @param deffered これをtrueに設定すると、command.deferHandlerが呼び出されるようになります。
+ * @returns {APIResponse}
+ */
+
 export const response = (
     type: InteractionResponseType,
     data: APIInteractionResponseCallbackData,
@@ -221,6 +261,12 @@ export const response = (
     } as APIResponse;
 };
 
+/**
+ * 
+ * @param data 入力されたオプションの値を表します。
+ * @returns {APIApplicationCommandAutocompleteResponse}
+ */
+
 export const autocompleteResponse = (
     data: APICommandAutocompleteInteractionResponseCallbackData,
 ) => {
@@ -229,6 +275,11 @@ export const autocompleteResponse = (
         data: data,
     } as unknown as APIApplicationCommandAutocompleteResponse;
 };
+
+/**
+ * コマンドが存在しないことを示すレスポンスを返します。
+ * @returns {APIResponse}
+ */
 
 export const commandNotFoundResponse = () => {
     const embed = new EmbedBuilder()

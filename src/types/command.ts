@@ -5,7 +5,7 @@ import {
 } from "discord-api-types/v10";
 import { Context } from "hono";
 import { Interaction } from "./interaction";
-import { APIResponse } from "../utils";
+import { APIResponse } from "../utils/response";
 
 export type Command = {
     commandData: {

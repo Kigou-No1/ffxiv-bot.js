@@ -32,3 +32,23 @@ export const deferResponse = (): MiddlewareHandler => async (c, next) => {
     c.set("deferResponse", () => new DefferedInteractionResponse(c.env.DISCORD_CLIENT_ID, token, c));
     return await next();
 }
+
+/* export const ratelimitHandler = (): MiddlewareHandler => async (c, next) => {
+    const interaction = await c.req.raw.clone().json<Interaction>();
+    const durableObject: DurableObjectNamespace = c.env.RATELIMIT;
+    const id = durableObject.idFromName(interaction.user?.id.toString()!+"_ratelimit");
+    const ratelimiter = durableObject.get(id);
+    const res = await ratelimiter.fetch("https://unko.unko.unko/"); // ここのURLは適当
+    if (res.status === 404) {
+        return await next()
+    } else {
+        const time = (await res.json()) as number;
+        const now = Date.now();
+        if (now - time >= 5000) {
+            return c.text("Rate limited", 429);
+        } else {
+            return await next()
+        }
+    }
+}
+ */
